@@ -2,15 +2,15 @@ import db from './db/db';
 import AuthService from './modules/auth/auth.service';
 import Google from './modules/google';
 import BPromise from 'bluebird';
-import Downloader from './util/downloader.util';
+import Downloader from './util/Downloader.js';
 import _ from 'lodash';
 import Slideshow from './modules/slideshow';
 import path from 'path';
 import config from './config';
-import Logger from './util/logger';
+import Logger from './util/Logger';
 
-var auth = new AuthService();
-var googleApi = new Google();
+const auth = new AuthService();
+const googleApi = new Google();
 
 export default class App {
     constructor(folderId, slideShowDir, interval) {
@@ -20,16 +20,15 @@ export default class App {
         this.downloader = new Downloader(path.join(process.cwd(), this.slideshowDir));
         this.slideshow = new Slideshow(path.join(process.cwd(), this.slideshowDir));
         this.log = new Logger('App');
-        this.loop;
+        this.loop = null;
     }
 
     start() {
-        var self = this;
-        self.log.info(`Starting main app. With interval of ${ self.interval } ms`);
-        self.getPictures()
-            .then(function () {
-                self.slideshow.start(config.slideshow.rotateSeconds, config.slideshow.refreshSeconds);
-                self.loop = setInterval(self.getPictures.bind(self), self.interval);
+        this.log.info(`Starting main app. With interval of ${ this.interval } ms`);
+        this.getPictures()
+            .then(() => {
+                this.slideshow.start(config.slideshow.rotateSeconds, config.slideshow.refreshSeconds);
+                this.loop = setInterval(() => this.getPictures, this.interval);
             });
     }
 
@@ -62,16 +61,15 @@ export default class App {
     }
 
     _getFileAndDownload(file, dbResults) {
-        var self = this;
-        var picture;
-        var dbItem = _.find(dbResults, {id: file.id});
+        const dbItem = _.find(dbResults, {id: file.id});
+        let picture;
 
         if (dbItem && dbItem.downloaded) {
             return dbItem;
         }
 
         return googleApi.drive.getFile(file.id)
-            .then(function (result) {
+            .then((result) => {
                 picture = {
                     id: result.id,
                     name: result.title,
@@ -80,7 +78,7 @@ export default class App {
                 if (!result.webContentLink) {
                     return picture;
                 }
-                return self.downloader.downloadFile(result.webContentLink, result.title)
+                return this.downloader.downloadFile(result.webContentLink, result.title)
                     .then(function (result) {
                         picture.downloaded = true;
                         return picture
@@ -92,30 +90,29 @@ export default class App {
     }
 
     getPictures() {
-        var self = this;
-        self.log.debug('Downloading Pictures', new Date());
-        return self._authenticateApp()
-            .then(function () {
+        this.log.debug('Downloading Pictures', new Date());
+        return this._authenticateApp()
+            .then(() => {
                 return BPromise.join(
-                    self._listFoldersChildren(),
-                    self._checkDbForExistingPictures()
+                    this._listFoldersChildren(),
+                    this._checkDbForExistingPictures()
                 )
             })
-            .spread(function (driveResults, dbResults)  {
-                return BPromise.map(driveResults.items, function (file) {
-                    return self._getFileAndDownload(file, dbResults)
+            .spread((driveResults, dbResults) => {
+                return BPromise.map(driveResults.items, (file) => {
+                    return this._getFileAndDownload(file, dbResults)
                 }, {concurrency: 4});
             })
-            .then(function (results) {
+            .then((results) => {
                 return db.setItem('pictures', results);
             })
-            .then(function (result) {
-                self.log.debug("Finished Downloading Pictures", new Date());
+            .then(() => {
+                this.log.debug("Finished Downloading Pictures", new Date());
             })
-            .catch(function (err) {
+            .catch((err) => {
                 return auth.authenticate()
-                    .then(function () {
-                        return self.getPictures();
+                    .then(() => {
+                        return this.getPictures();
                     });
             });
     }

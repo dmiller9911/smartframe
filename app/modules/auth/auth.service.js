@@ -4,21 +4,19 @@ import childProcess from 'child_process';
 import db from './../../db/db';
 import _ from 'lodash';
 import events from 'events';
-import Logger from './../../util/logger';
+import Logger from './../../util/Logger';
 
 var eventEmitter = new events.EventEmitter();
 
 const DB_AUTH_KEY = "auth";
-
-
-var OAuth2 = google.auth.OAuth2;
-var oauth2Client = new OAuth2(config.userGoogle.client_id, config.userGoogle.client_secret, config.google.redirect_uri);
-google.options({ auth: oauth2Client});
-
-var url = oauth2Client.generateAuthUrl({
+const OAuth2 = google.auth.OAuth2;
+const oauth2Client = new OAuth2(config.userGoogle.client_id, config.userGoogle.client_secret, config.google.redirect_uri);
+const url = oauth2Client.generateAuthUrl({
     access_type: config.google.access_type, // 'online' (default) or 'offline' (gets refresh_token)
     scope: config.google.scopes // If you only need one scope you can pass it as string
 });
+
+google.options({ auth: oauth2Client});
 
 export default class AuthService {
     constructor() {
@@ -55,24 +53,22 @@ export default class AuthService {
     }
 
     getToken(code) {
-        var self = this;
-        var credentials;
+        let credentials;
 
         return getTokenFromGoogle(code)
-        .then(function (response) {
-            credentials = response;
-            return db.getItem(DB_AUTH_KEY)
-        })
-        .then(function (dbCreds) {
-            dbCreds = dbCreds || {};
-            credentials = _.assign(dbCreds, credentials);
-            return db.setItem(DB_AUTH_KEY, credentials);
-        })
-        .then(function () {
-            self.setCredentials(credentials);
-            eventEmitter.emit('login');
-            return credentials;
-        });
+            .then((response) => {
+                credentials = response;
+                return db.getItem(DB_AUTH_KEY)
+            })
+            .then((dbCreds = {}) => {
+                credentials = _.assign(dbCreds, credentials);
+                return db.setItem(DB_AUTH_KEY, credentials);
+            })
+            .then(() => {
+                this.setCredentials(credentials);
+                eventEmitter.emit('login');
+                return credentials;
+            });
     }
 }
 

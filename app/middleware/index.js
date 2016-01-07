@@ -1,6 +1,6 @@
-import Logger from './../util/logger';
+import Logger from './../util/Logger';
 
-import CorsMiddleware from './preRoute/cors.middleware';
+import CorsMiddleware from './preRoute/CorsMiddleware.js';
 
 export default class Middleware {
     constructor(server) {
@@ -10,7 +10,7 @@ export default class Middleware {
 
     preRoute() {
         this.log.debug('Initializing Pre-Route App Middleware');
-        new CorsMiddleware(this.app);
+        new CorsMiddleware(this.app).init();
     }
 
     postRoute(app) {

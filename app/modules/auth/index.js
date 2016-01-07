@@ -1,5 +1,5 @@
 import AuthRoutes from './auth.routes';
-import Logger from './../../util/logger';
+import Logger from './../../util/Logger';
 
 export default class AuthModule {
     constructor(server) {

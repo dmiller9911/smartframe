@@ -1,9 +1,9 @@
 import BPromise from 'bluebird';
 import fs from 'fs';
+import path from 'path';
 
 
-
-const DB_FILE = 'app/db/db.json';
+const DB_FILE = path.join(process.cwd(), 'app/db/db.json');
 
 class DataStore {
     constructor() {
@@ -11,41 +11,40 @@ class DataStore {
     }
 
     setItem(key, value) {
-        var self = this;
         return fs.readFileAsync(DB_FILE, 'utf8')
-            .then(function (data) {
-                var db = JSON.parse(data);
+            .then((data) => {
+                let db = JSON.parse(data);
                 db[key] = value;
                 return fs.writeFileAsync(DB_FILE, JSON.stringify(db, undefined, 2));
             })
-            .catch(function (err) {
+            .catch((err) => {
                 if (err.code === "ENOENT") {
                     return fs.writeFileAsync(DB_FILE, JSON.stringify({}, undefined, 2))
-                        .then(function () {
-                            return self.setItem(key, value);
+                        .then(() => {
+                            return this.setItem(key, value);
                         });
                 }
-            })
+            });
     }
 
     getItem(key) {
         var self = this;
         return fs.readFileAsync(DB_FILE, 'utf8')
             .then(function (data) {
-                var db = JSON.parse(data);
+                let db = JSON.parse(data);
                 return db[key]
             })
-            .catch(function (err) {
+            .catch((err) => {
                 if (err.code === "ENOENT") {
                     return fs.writeFileAsync(DB_FILE, JSON.stringify({}, undefined, 2))
-                        .then(function () {
-                            return self.getItem(key);
+                        .then(() => {
+                            return this.setItem(key, value);
                         });
                 }
             });
     }
 }
 
-var db = new DataStore();
+const db = new DataStore();
 
 export default db;

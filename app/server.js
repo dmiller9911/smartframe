@@ -1,7 +1,6 @@
 import express from 'express';
 import Middleware from './middleware';
-import Logger from './util/logger';
-
+import Logger from './util/Logger';
 import AuthModule from './modules/auth';
 
 export default class Server {
@@ -25,6 +24,8 @@ export default class Server {
 
         //Load Post Route Middleware
         this.middleware.postRoute(this);
+
+        return this;
     }
 
     listen() {

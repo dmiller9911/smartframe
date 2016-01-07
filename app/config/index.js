@@ -12,7 +12,9 @@ export default (function () {
         throw new Error("User Settings Not Found. You Must Run: \"grunt setup\" to configure slideshow settings");
     }
 
-    var config = {
+    return {
+        userGoogle,
+        slideshow,
         logLevel: "debug",
         port: 3000,
         slideshowdir: '/pictures',
@@ -33,9 +35,6 @@ export default (function () {
                 "email",
                 "https://www.googleapis.com/auth/drive.readonly"
             ]
-        },
-        userGoogle: userGoogle,
-        slideshow: slideshow
+        }
     };
-    return config;
 })();

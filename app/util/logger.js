@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import winston from 'winston';
 import config from './../config';
 
-var log = new (winston.Logger)({
+const log = new (winston.Logger)({
     transports: [
         new (winston.transports.Console)({
             colorize: true,

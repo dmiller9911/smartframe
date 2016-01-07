@@ -1,5 +1,5 @@
 import childProcess from 'child_process';
-import Logger from './../../util/logger';
+import Logger from './../../util/Logger';
 
 export default class Slideshow {
     constructor(directory) {

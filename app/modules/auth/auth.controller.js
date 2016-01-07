@@ -13,7 +13,7 @@ export default class AuthController {
     }
 
     handleOauthCallback() {
-        var code = this.req.query.code;
+        let code = this.req.query.code;
         return new AuthService().getToken(code);
     }
 }
