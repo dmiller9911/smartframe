@@ -9,14 +9,15 @@ export default class AuthRoutes {
     constructor(app) {
         this.router = Router();
         this.app = app;
+    }
 
-        this.router.get('/callback', function (req, res) {
+    init() {
+        this.router.get('/callback', (req, res)  => {
             return new AuthController(req, res).handleOauthCallback()
-                .then(function (result) {
-                    res.send(result);
-                });
         });
 
         this.app.use(AUTH_PATH, this.router);
+
+        return this;
     }
 }

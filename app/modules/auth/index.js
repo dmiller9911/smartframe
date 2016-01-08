@@ -4,7 +4,8 @@ import Logger from './../../util/Logger';
 export default class AuthModule {
     constructor(server) {
         this.logger = new Logger('Auth');
-        this.routesV1 = new AuthRoutes(server.app);
+
+        this.routesV1 = new AuthRoutes(server.app).init();
 
         this.logger.debug('Auth Module loaded');
     }
