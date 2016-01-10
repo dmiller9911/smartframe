@@ -110,9 +110,18 @@ export default class App {
                 this.log.debug("Finished Downloading Pictures", new Date());
             })
             .catch((err) => {
+                if (err.code && err.code === "ENOTFOUND") {
+                    //Offline.  Show Cached Pictures;
+                    return Promise.resolve();
+                }
                 return auth.authenticate()
                     .then(() => {
                         return this.getPictures();
+                    })
+                    .catch((err) => {
+                        this.log.error(err);
+                        //Assume Offline.  Show Cached Pictures;
+                        return Promise.resolve();
                     });
             });
     }

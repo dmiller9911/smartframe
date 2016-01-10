@@ -26,15 +26,28 @@ export default class AuthService {
     authenticate() {
         return new Promise(function (resolve, reject) {
             var  exec = childProcess.exec;
+            let eventReceived = false;
             var browser = exec(`open -a "Google Chrome" "${ url }"`, function(err, stdout, stderr) {
                 if (err) throw err;
             });
 
-            eventEmitter.on('login', userLoggedIn);
+            waitForLogin();
+
+
+
+            function waitForLogin() {
+                eventEmitter.on('login', userLoggedIn);
+
+                setTimeout(() => {
+                    if (!eventReceived) {
+                        reject('Auth Failed.  Offline mode.');
+                    }
+                }, 10000)
+            }
 
             function userLoggedIn() {
+                eventReceived = true;
                 eventEmitter.removeListener('login', userLoggedIn);
-                resolve();
             }
         });
     }
